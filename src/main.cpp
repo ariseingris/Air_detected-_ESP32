@@ -136,6 +136,29 @@ void setAirLevel(AirLevel level)
     }
 }
 
+// ========================================================
+// GAS SENSOR PREHEAT
+// ========================================================
+
+constexpr unsigned long GAS_PREHEAT_MS = 60000; // tối thiểu 60s cho demo, MiCS-5524 lý tưởng cần lâu hơn
+
+void gasPreheat()
+{
+    Serial.println("Preheating gas sensor... please wait");
+
+    unsigned long start = millis();
+
+    while (millis() - start < GAS_PREHEAT_MS)
+    {
+        // Nhấp nháy vàng để báo đang khởi động, tránh để LED tắt gây hiểu nhầm là lỗi
+        setLEDs(false, true, false);
+        delay(300);
+        setLEDs(false, false, false);
+        delay(300);
+    }
+
+    Serial.println("Preheat complete.");
+}
 
 // ============================================================
 // BUZZER
@@ -448,6 +471,8 @@ void setup()
     // ========================================================
 
     startupTest();
+
+    gasPreheat();
 
     // ========================================================
     // READY
