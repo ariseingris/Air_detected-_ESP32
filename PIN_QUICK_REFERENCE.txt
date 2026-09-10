@@ -1,0 +1,93 @@
+# Pin Quick Reference Card
+
+**ESP32 Air Quality Detector - All Pins At A Glance**
+
+## Wiring Summary Table
+
+| Label | GPIO | Type | Device | Wire Color | Status |
+|-------|------|------|--------|-----------|--------|
+| **GREEN_LED_PIN** | 12 | OUT | Green LED | Green | Verified ✓ |
+| **YELLOW_LED_PIN** | 13 | OUT | Yellow LED | Yellow | Verified ✓ |
+| **RED_LED_PIN** | 14 | OUT | Red LED | Red | Verified ✓ |
+| **DUST_SENSOR_PIN** | 34 | IN (ADC) | Dust Sensor | Purple | Verified ✓ |
+| **DUST_LED_PIN** | 26 | OUT | Dust Sensor LED | White | Verified ✓ |
+| **GAS_SENSOR_PIN** | 35 | IN (ADC) | Gas Sensor | Blue | **IMPORTANT** |
+| **BUZZER_PIN** | 27 | OUT | Buzzer | Orange | Verified ✓ |
+| **GND** | ⏚ | GND | Common Ground | Black | All connected |
+| **3V3** | + | VCC | 3.3V Supply | Red | All connected |
+
+## Pin Critical Notes
+
+### ⚠️ CRITICAL: GPIO35 (GAS Sensor)
+- **THIS PIN WAS MISSING** in the original code
+- Dust sensor was incorrectly reading from GPIO34 (same as dust)
+- **FIX APPLIED**: Now uses separate GPIO35 for gas sensor
+- Verify your physical wiring connects gas sensor to GPIO35, NOT GPIO34
+
+### GPIO34 vs GPIO35 (Both ADC1)
+- GPIO34 (ADC1_CH6): Dust sensor - CORRECT ✓
+- GPIO35 (ADC1_CH7): Gas sensor - CORRECT ✓
+- **Do NOT use GPIO32, GPIO33** - they are ADC2 (WiFi conflicts)
+
+### GPIO26-27 (Control outputs)
+- GPIO26: Dust sensor LED timing control
+- GPIO27: Buzzer alarm
+- Both have strict timing requirements
+
+## Power Connections
+
+```
+ESP32 3V3 ──┬──→ Dust Sensor VIN
+            ├──→ Gas Sensor VIN
+            ├──→ LEDs (via resistor)
+            └──→ Buzzer (via transistor if needed)
+
+ESP32 GND ──┬──→ Dust Sensor GND
+            ├──→ Gas Sensor GND
+            ├──→ LEDs
+            └──→ Buzzer
+```
+
+## ADC Pins Reference (ESP32)
+
+| PIN | Channel | Notes |
+|-----|---------|-------|
+| GPIO32 | ADC1_CH4 | ❌ NOT USED (ADC2 conflict) |
+| GPIO33 | ADC1_CH5 | ❌ NOT USED (ADC2 conflict) |
+| GPIO34 | ADC1_CH6 | ✓ Dust Sensor |
+| GPIO35 | ADC1_CH7 | ✓ Gas Sensor |
+| GPIO36 | ADC1_CH0 | Alternative if needed |
+| GPIO39 | ADC1_CH3 | Alternative if needed |
+
+## Getting Help
+
+1. **Serial Output shows garbage?** → Check baud rate is 115200
+2. **ADC stuck at 0 or 4095?** → Verify correct GPIO and 3.3V supply
+3. **LED won't light?** → Check 330Ω resistor and polarity
+4. **Buzzer silent?** → May need external transistor driver for 3.3V GPIO
+5. **Gas sensor always 0%?** → Make sure it's connected to GPIO35 (not 34!)
+
+## Verification Checklist
+
+On startup, you should see in serial:
+```
+========================================
+Air Detector - INITIALIZED
+========================================
+Dust Sensor   : GPIO34 (ADC1_CH6)
+Dust LED      : GPIO26 (IR control)
+Gas Sensor    : GPIO35 (ADC1_CH7)
+Red LED       : GPIO14
+Yellow LED    : GPIO13
+Green LED     : GPIO12
+Buzzer        : GPIO27
+========================================
+```
+
+If any GPIO number is different, your wiring doesn't match the code.
+
+---
+
+**Code Version:** ESP32 v1.0  
+**Last Updated:** 2026-09-10  
+**Status:** Ready for calibration
